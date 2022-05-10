@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon ./server.ts",
+    "post": "nodemon ./src/express-post.ts",
     "hello": "nodemon ./src/hello.js",
     "loop": "nodemon ./src/eventLoop.js",
     "myts": "nodemon ./src/myFirstTsScript.ts",
