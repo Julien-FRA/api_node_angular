@@ -1,10 +1,11 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "\"Serveur nodejs\"",
+  "description": "Serveur nodejs",
   "main": "index.js",
   "scripts": {
     "hello": "nodemon ./src/hello.js",
+    "loop": "nodemon ./src/eventLoop.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
