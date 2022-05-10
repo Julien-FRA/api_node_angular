@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  vscode:
+    build: 
+      context: ./
+      dockerfile: ./Dockerfile.dev
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    container_name: api_vscode
+    working_dir: /server
+    networks:
+      - app-network
+    volumes:
+      # Nous allons préciser le dossier local
+      - .:/server:cached
+
+
+networks:
+  app-network:
+    driver: bridge
