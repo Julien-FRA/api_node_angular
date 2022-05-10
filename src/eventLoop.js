@@ -10,8 +10,8 @@ const FILEPATH = path.join(__dirname, '..', 'media', 'grunter.JPG');
 // console.log(buffer);   
 
 const imgReady = (err, buf) => {
-    console.log(buf)
-}
+    console.log(buf);
+};
 
 console.time("load sync");
 const buffer2 = fs.readFile(FILEPATH, imgReady);
