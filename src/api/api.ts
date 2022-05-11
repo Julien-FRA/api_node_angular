@@ -1,30 +1,21 @@
 import Express from "express";
+import { ROUTES_USER } from './middleware/user';
 import { json } from 'body-parser';
-import { USER_ROUTES } from './routes/user';
-import { AUTH_MIDDLEWARE } from './middleware/authorisation';
-import { Router } from 'express';
 
+// Récupérer le port des variables d'environnement ou préciser une valeur par défaut
 const PORT = process.env.PORT || 5050;
 
+// Créer l'objet Express
 const app = Express();
 
+// L'appli parse le corps du message entrant comme du json
 app.use(json());
 
-const auth_routes = Router();
-auth_routes.use(AUTH_MIDDLEWARE("normal"));
-auth_routes.use('/user', USER_ROUTES);
+app.use('/user', ROUTES_USER);
 
-const admin_routes = Router();
-auth_routes.use(AUTH_MIDDLEWARE("admin"));
-auth_routes.use('/user', USER_ROUTES);
-
-app.use('/auth', auth_routes);
-app.use('/admin', admin_routes);
-
-try {
-    app.listen(PORT, () => {
-        console.info("API Listening on port " + PORT);
-    });
-} catch (err) {
-    console.log(err);
-}
+// Lancer le serveur
+app.listen(PORT,
+  () => {
+    console.info("API Listening on port " + PORT);
+  }
+);

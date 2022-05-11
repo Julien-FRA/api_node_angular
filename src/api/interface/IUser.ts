@@ -4,3 +4,7 @@ export interface IUser {
     familyName?: string;
     givenMail?: string;
 }
+
+export type IUserCreate = Omit<IUser, 'userId'>;
+
+export type IUserRO = Readonly<IUser>;

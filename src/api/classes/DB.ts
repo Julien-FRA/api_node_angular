@@ -1,20 +1,28 @@
-import { createPool, Pool } from 'mysql2/promise';
+import mysql, { Pool } from 'mysql2/promise';
 
-
+/** Wrapper de la connexion à la SGBDR.
+ * On stock une seule référence à la connexion-pool, et on va systematiquement
+ * récupérer cette référence pour nos requêtes.
+ */
 export class DB {
 
-    private static DbPool: Pool;
+  // Variable "static": une seule instance pour toutes les instances de la classe DB
+  private static POOL: Pool;
 
-    static get Connection() {
-        if (!this.DbPool) {
-            this.DbPool = createPool({
-                host: process.env.DB_HOST || "dbms",
-                user: process.env.DB_USER || "api-dev",
-                password: process.env.DB_PASS || "api-dev-password",
-                database: process.env.DB_DATABASE || "test"
-            })
-        }
-
-        return this.DbPool;
+  /**
+   * Récupérer ou créer la connexion-pool.
+   */
+  static get Connection(): Pool {
+    if (!this.POOL) {
+      this.POOL = mysql.createPool({
+        host: process.env.DB_HOST || 'dbms',
+        user: process.env.DB_USER || 'api-dev',
+        database: process.env.DB_DATABASE || 'test',
+        password: process.env.DB_PASSWORD || 'api-dev-password',  
+      });
     }
+
+    return this.POOL;
+  }
+
 }
