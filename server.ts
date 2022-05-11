@@ -12,7 +12,7 @@ const app = Express();
 app.use(json());
 
 // Créer un endpoint GET
-app.get('/helo', 
+app.get('/helo',
   (request: Request, response: Response, next: NextFunction) => {
     response.send("<h1>Hello world!</h1>");
   }

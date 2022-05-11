@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon ./server.ts",
-    "post": "nodemon ./src/express-post.ts",
-    "hello": "nodemon ./src/hello.js",
-    "loop": "nodemon ./src/eventLoop.js",
-    "myts": "nodemon ./src/myFirstTsScript.ts",
-    "promise": "nodemon ./src/promise.ts",
+    "api": "nodemon ./src/api/api.ts",
+    "post": "nodemon ./src/train/express-post.ts",
+    "loop": "nodemon ./src/train/eventLoop.js",
+    "myts": "nodemon ./src/train/myFirstTsScript.ts",
+    "promise": "nodemon ./src/train/promise.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.16",
+    "prettier": "2.6.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
   }
