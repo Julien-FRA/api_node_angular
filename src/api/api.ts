@@ -4,7 +4,6 @@ import { USER_ROUTES } from './routes/user';
 import { AUTH_MIDDLEWARE } from './middleware/authorisation';
 import { Router } from 'express';
 
-
 const PORT = process.env.PORT || 5050;
 
 const app = Express();
