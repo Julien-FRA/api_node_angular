@@ -5,6 +5,7 @@ import { ICreateResponse } from '../interface/ICreateResponse';
 import { IIndexQuery, IIndexResponse } from '../interface/IIndexQuery';
 import { ITableCount } from '../interface/ITableCount';
 import { IUser, IUserRO } from '../interface/IUser';
+import { IParams } from '../interface/IParams';
 
 
 
@@ -16,7 +17,7 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
     try {
 
       const db = DB.Connection;
-      
+
       // On suppose que le params query sont en format string, et potentiellement
       // non-numérique, ou corrompu
       const page = parseInt(request.query.page || "0") || 0;
@@ -24,10 +25,10 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
       const offset = page * limit;
 
       // D'abord, récupérer le nombre total
-      const count = await db.query<ITableCount[] & RowDataPacket[]>("select count(*) as total from user");      
+      const count = await db.query<ITableCount[] & RowDataPacket[]>("select count(*) as total from user");
 
       // Récupérer les lignes
-      const data = await db.query<IUserRO[] & RowDataPacket[]>("select userId, familyName, givenName, email from user limit ? offset ?", [limit, offset]);      
+      const data = await db.query<IUserRO[] & RowDataPacket[]>("select userId, familyName, givenName, email from user limit ? offset ?", [limit, offset]);
 
       // Construire la réponse
       const res: IIndexResponse<IUserRO> = {
@@ -46,12 +47,69 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
   }
 );
 
+routerIndex.get<IParams, {}, {}, {}>('/:id',
+  async (request, response, next: NextFunction) => {
+    try {
+
+      const db = DB.Connection;
+      
+      const userId = request.params.id;
+
+      const data = await db.query(`select userId, familyName, givenName, email from user where userId=?`, [userId]);
+
+      response.json(data);
+
+    } catch (err: any) {
+      next(err);
+    }
+  }
+)
+
+routerIndex.put<IParams, {}, {}, {}>('/:id',
+  async (request, response, next: NextFunction) => {
+    try {
+
+      const db = DB.Connection;
+      
+      const userId = request.params.id;
+
+      const user = request.body;
+
+      const data = await db.query("insert into user set ? where userId=?", [user, userId]);
+
+      response.json(data);
+
+    } catch (err: any) {
+      next(err);
+    }
+  }
+)
+
+routerIndex.delete<IParams, {}, {}, {}>('/:id',
+  async (request, response, next: NextFunction) => {
+    try {
+
+      const db = DB.Connection;
+      
+      const userId = request.params.id;
+
+      const data = await db.query(`delete from user where userId=?`, [userId]);
+
+      response.json(data);
+
+    } catch (err: any) {
+      next(err);
+    }
+  }
+)
+
 
 routerIndex.post<{}, ICreateResponse, IUser>('/',
   async (request, response, next: NextFunction) => {
 
     try {
       const user = request.body;
+
 
       // ATTENTION ! Et si les données dans user ne sont pas valables ?
       // - colonnes qui n'existent pas ?
@@ -60,7 +118,7 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
       const db = DB.Connection;
       const data = await db.query<OkPacket>("insert into user set ?", user);
 
-      response.json({ 
+      response.json({
         id: data[0].insertId
       });
 
@@ -70,7 +128,6 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
 
   }
 );
-
 
 
 // Regroupé
