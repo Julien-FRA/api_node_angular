@@ -11,6 +11,33 @@ import { IParams } from '../interface/IParams';
 
 const routerIndex = Router({ mergeParams: true });
 
+routerIndex.post<{}, ICreateResponse, IUser>('/',
+  async (request, response, next: NextFunction) => {
+
+    try {
+      const user = request.body;
+
+
+      // ATTENTION ! Et si les données dans user ne sont pas valables ?
+      // - colonnes qui n'existent pas ?
+      // - données pas en bon format ?
+
+      const db = DB.Connection;
+      const data = await db.query<OkPacket>("insert into user set ?", user);
+
+      response.json({
+        id: data[0].insertId
+      });
+
+    } catch (err: any) {
+      next(err);
+    }
+
+  }
+);
+
+// Récupération de la totalité des user
+
 routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
   async (request, response, next: NextFunction) => {
 
@@ -47,6 +74,8 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
   }
 );
 
+// Récupération d'un user spécific grâce à son id
+
 routerIndex.get<IParams, {}, {}, {}>('/:id',
   async (request, response, next: NextFunction) => {
     try {
@@ -65,17 +94,19 @@ routerIndex.get<IParams, {}, {}, {}>('/:id',
   }
 )
 
+// Modification d'un user grâce a son id
+
 routerIndex.put<IParams, {}, {}, {}>('/:id',
   async (request, response, next: NextFunction) => {
     try {
-
-      const db = DB.Connection;
       
       const userId = request.params.id;
 
       const user = request.body;
 
-      const data = await db.query("insert into user set ? where userId=?", [user, userId]);
+      const db = DB.Connection;
+
+      const data = await db.query("update user set ? where userId=?", [user, userId]);
 
       response.json(data);
 
@@ -84,6 +115,8 @@ routerIndex.put<IParams, {}, {}, {}>('/:id',
     }
   }
 )
+
+// Suppression d'un user grâce à son id
 
 routerIndex.delete<IParams, {}, {}, {}>('/:id',
   async (request, response, next: NextFunction) => {
@@ -102,32 +135,6 @@ routerIndex.delete<IParams, {}, {}, {}>('/:id',
     }
   }
 )
-
-
-routerIndex.post<{}, ICreateResponse, IUser>('/',
-  async (request, response, next: NextFunction) => {
-
-    try {
-      const user = request.body;
-
-
-      // ATTENTION ! Et si les données dans user ne sont pas valables ?
-      // - colonnes qui n'existent pas ?
-      // - données pas en bon format ?
-
-      const db = DB.Connection;
-      const data = await db.query<OkPacket>("insert into user set ?", user);
-
-      response.json({
-        id: data[0].insertId
-      });
-
-    } catch (err: any) {
-      next(err);
-    }
-
-  }
-);
 
 
 // Regroupé
