@@ -6,6 +6,7 @@ import { IIndexQuery, IIndexResponse, IIndexResponseId } from '../interface/IInd
 import { ITableCount } from '../interface/ITableCount';
 import { IUser, IUserRO } from '../interface/IUser';
 import { IParams } from '../interface/IParams';
+import { CustomError } from "../classes/CustomError";
 
 
 const routerIndex = Router({ mergeParams: true });
@@ -27,6 +28,8 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
       response.json({
         id: data[0].insertId
       });
+
+      throw new CustomError('forgot something?', 400, 'you can do better than that');
 
     } catch (err: any) {
       next(err);
