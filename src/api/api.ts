@@ -1,6 +1,7 @@
 import Express from "express";
 import { ROUTES_USER } from './middleware/user';
 import { json } from 'body-parser';
+import { ErrorCatch } from "./middleware/erreur";
 
 // Récupérer le port des variables d'environnement ou préciser une valeur par défaut
 const PORT = process.env.PORT || 5050;
@@ -13,9 +14,15 @@ app.use(json());
 
 app.use('/user', ROUTES_USER);
 
+app.get('*', function (req, res) {
+  res.status(404).send("La page n'existe pas");
+});
+
 // Lancer le serveur
-app.listen(PORT,
-  () => {
-    console.info("API Listening on port " + PORT);
-  }
-);
+try {
+  app.listen(PORT, () => {
+      console.info("API Listening on port " + PORT);
+  });
+} catch (err) {
+  console.log(err);
+}

@@ -1,12 +1,11 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { application, NextFunction, Request, Response, Router } from "express";
 import { OkPacket, RowDataPacket } from 'mysql2';
 import { DB } from '../classes/DB';
 import { ICreateResponse } from '../interface/ICreateResponse';
-import { IIndexQuery, IIndexResponse } from '../interface/IIndexQuery';
+import { IIndexQuery, IIndexResponse, IIndexResponseId } from '../interface/IIndexQuery';
 import { ITableCount } from '../interface/ITableCount';
 import { IUser, IUserRO } from '../interface/IUser';
 import { IParams } from '../interface/IParams';
-
 
 
 const routerIndex = Router({ mergeParams: true });
@@ -76,7 +75,7 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
 
 // Récupération d'un user spécific grâce à son id
 
-routerIndex.get<IParams, {}, {}, {}>('/:id',
+routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
   async (request, response, next: NextFunction) => {
     try {
 
@@ -84,9 +83,14 @@ routerIndex.get<IParams, {}, {}, {}>('/:id',
       
       const userId = request.params.id;
 
-      const data = await db.query(`select userId, familyName, givenName, email from user where userId=?`, [userId]);
+      const data = await db.query<IUserRO[] & RowDataPacket[]>(`select userId, familyName, givenName, email from user where userId=?`, [userId]);
 
-      response.json(data);
+      const res: IIndexResponseId<IUserRO> = {
+        id: userId,
+        rows: data[0]
+      }
+
+      response.json(res);
 
     } catch (err: any) {
       next(err);
@@ -96,7 +100,7 @@ routerIndex.get<IParams, {}, {}, {}>('/:id',
 
 // Modification d'un user grâce a son id
 
-routerIndex.put<IParams, {}, {}, {}>('/:id',
+routerIndex.put<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
   async (request, response, next: NextFunction) => {
     try {
       
@@ -106,9 +110,14 @@ routerIndex.put<IParams, {}, {}, {}>('/:id',
 
       const db = DB.Connection;
 
-      const data = await db.query("update user set ? where userId=?", [user, userId]);
+      const data = await db.query<IUserRO[] & RowDataPacket[]>("update user set ? where userId=?", [user, userId]);
 
-      response.json(data);
+      const res: IIndexResponseId<IUserRO> = {
+        id: userId,
+        rows: data[0]
+      }
+
+      response.json(res);
 
     } catch (err: any) {
       next(err);

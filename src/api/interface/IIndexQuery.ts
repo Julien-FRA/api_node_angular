@@ -15,3 +15,8 @@ export interface IIndexResponse<T> {
     total: number;
     rows: T[];
 }
+
+export interface IIndexResponseId<T> {
+  id?: number;
+  rows: T[];
+}
