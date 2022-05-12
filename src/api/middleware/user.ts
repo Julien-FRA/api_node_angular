@@ -29,10 +29,8 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
         id: data[0].insertId
       });
 
-      throw new CustomError('forgot something?', 400, 'you can do better than that');
-
     } catch (err: any) {
-      next(err);
+      next(new CustomError(`Erreur d'insertion des données`, 400, err.message));
     }
 
   }
@@ -67,7 +65,13 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
         rows: data[0]
       }
 
-      response.json(res);
+      const userArray = res.rows;
+
+      if (userArray.length > 0) {
+        response.json(res);
+      } else {
+        throw new CustomError(`Aucun utilisateur n'est renseigné`, 404, 'Unknown user');
+      }
 
     } catch (err: any) {
       next(err);
@@ -83,7 +87,7 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
     try {
 
       const db = DB.Connection;
-      
+
       const userId = request.params.id;
 
       const data = await db.query<IUserRO[] & RowDataPacket[]>(`select userId, familyName, givenName, email from user where userId=?`, [userId]);
@@ -93,7 +97,13 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
         rows: data[0]
       }
 
-      response.json(res);
+      const userArray = res.rows;
+
+      if (userArray.length > 0) {
+        response.json(res);
+      } else {
+        throw new CustomError(`Utilisateur introuvable`, 404, 'Unknown user');
+      }
 
     } catch (err: any) {
       next(err);
@@ -106,7 +116,7 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
 routerIndex.put<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
   async (request, response, next: NextFunction) => {
     try {
-      
+
       const userId = request.params.id;
 
       const user = request.body;
@@ -120,10 +130,16 @@ routerIndex.put<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
         rows: data[0]
       }
 
-      response.json(res);
+      const userArray = res.rows;
+
+      if (userArray.length > 0) {
+        response.json(res);
+      } else {
+        throw new CustomError(`Utilisateur introuvable`, 404, 'Unknown user');
+      }
 
     } catch (err: any) {
-      next(err);
+      next(new CustomError(`Utilisateur introuvable`, 404, 'Unknown user'));
     }
   }
 )
@@ -135,7 +151,7 @@ routerIndex.delete<IParams, {}, {}, {}>('/:id',
     try {
 
       const db = DB.Connection;
-      
+
       const userId = request.params.id;
 
       const data = await db.query(`delete from user where userId=?`, [userId]);
@@ -143,7 +159,7 @@ routerIndex.delete<IParams, {}, {}, {}>('/:id',
       response.json(data);
 
     } catch (err: any) {
-      next(err);
+      next(new CustomError(`Utilisateur introuvable`, 404, err.message));
     }
   }
 )

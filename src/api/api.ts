@@ -2,6 +2,7 @@ import Express from "express";
 import { ROUTES_USER } from './middleware/user';
 import handleError from './middleware/error-handler'
 import { json } from 'body-parser';
+import { CustomError } from "./classes/CustomError";
 
 // Récupérer le port des variables d'environnement ou préciser une valeur par défaut
 const PORT = process.env.PORT || 5050;
@@ -13,6 +14,10 @@ const app = Express();
 app.use(json());
 
 app.use('/user', ROUTES_USER);
+
+app.get('*', (req, res) => {
+  throw new CustomError(`Vous êtes perdu!`, 404, `Unknown url`);
+});
 
 app.use(handleError);
 
