@@ -17,11 +17,6 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
     try {
       const user = request.body;
 
-
-      // ATTENTION ! Et si les données dans user ne sont pas valables ?
-      // - colonnes qui n'existent pas ?
-      // - données pas en bon format ?
-
       const db = DB.Connection;
       const data = await db.query<OkPacket>("insert into user set ?", user);
 
@@ -47,8 +42,8 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
 
       // On suppose que le params query sont en format string, et potentiellement
       // non-numérique, ou corrompu
-      const page = parseInt(request.query.page || "0") || 0;
-      const limit = parseInt(request.query.limit || "10") || 0;
+      const page: number = parseInt(request.query.page || "0") || 0;
+      const limit: number = parseInt(request.query.limit || "10") || 0;
       const offset = page * limit;
 
       // D'abord, récupérer le nombre total
@@ -65,16 +60,16 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
         rows: data[0]
       }
 
-      const userArray = res.rows;
+      const [ rowResult ] = res.rows;
 
-      if (userArray.length > 0) {
-        response.json(res);
-      } else {
-        throw new CustomError(`Aucun utilisateur n'est renseigné`, 404, 'Unknown user');
+      if(!rowResult) {
+        throw new CustomError(`Erreur dans la requête`, 404, 'Unknown user');
       }
 
+      response.json(res);
+
     } catch (err: any) {
-      next(err);
+      next(new CustomError(err.message, 404, err));
     }
 
   }
@@ -97,16 +92,16 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
         rows: data[0]
       }
 
-      const userArray = res.rows;
+      const [ rowResult ] = res.rows;
 
-      if (userArray.length > 0) {
-        response.json(res);
-      } else {
-        throw new CustomError(`Utilisateur introuvable`, 404, 'Unknown user');
+      if(!rowResult) {
+        throw new CustomError(`userId not found`, 404, 'Unknown user');
       }
 
+      response.json(res);
+
     } catch (err: any) {
-      next(err);
+      next(new CustomError(err.message, 404, err));
     }
   }
 )
@@ -123,23 +118,18 @@ routerIndex.put<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
 
       const db = DB.Connection;
 
-      const data = await db.query<IUserRO[] & RowDataPacket[]>("update user set ? where userId=?", [user, userId]);
+      const data = await db.query<OkPacket>("update user set ? where userId=?", [user, userId]);
 
-      const res: IIndexResponseId<IUserRO> = {
-        id: userId,
-        rows: data[0]
-      }
+      const affectedRows = data[0].affectedRows;
 
-      const userArray = res.rows;
-
-      if (userArray.length > 0) {
-        response.json(res);
-      } else {
+      if (!affectedRows) {
         throw new CustomError(`Utilisateur introuvable`, 404, 'Unknown user');
       }
 
+      response.sendStatus(200);
+
     } catch (err: any) {
-      next(new CustomError(`Utilisateur introuvable`, 404, 'Unknown user'));
+      next(new CustomError(err.message, 404, err));
     }
   }
 )
@@ -154,12 +144,18 @@ routerIndex.delete<IParams, {}, {}, {}>('/:id',
 
       const userId = request.params.id;
 
-      const data = await db.query(`delete from user where userId=?`, [userId]);
+      const data = await db.query<OkPacket>(`delete from user where userId=?`, [userId]);
 
-      response.json(data);
+      const affectedRows = data[0].affectedRows;
+
+      if (!affectedRows) {
+        throw new CustomError(`Utilisateur introuvable`, 404, 'Unknown user');
+      }
+
+      response.sendStatus(200);
 
     } catch (err: any) {
-      next(new CustomError(`Utilisateur introuvable`, 404, err.message));
+      next(new CustomError(err.message, 404, err));
     }
   }
 )
