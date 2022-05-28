@@ -3,6 +3,7 @@ export interface IUser {
     familyName?: string;
     givenName?: string;
     email: string;
+    password: string;
 }
 
 // export type IUserCreate = Omit<IUser, 'userId'>;

@@ -8,8 +8,9 @@ import { IUser, IUserRO } from '../interface/IUser';
 import { IParams } from '../interface/IParams';
 import { CustomError } from "../classes/CustomError";
 
-
 const routerIndex = Router({ mergeParams: true });
+
+const bcrypt = require('bcryptjs');
 
 routerIndex.post<{}, ICreateResponse, IUser>('/',
   async (request, response, next: NextFunction) => {
@@ -17,8 +18,15 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
     try {
       const user = request.body;
 
+      const password = user.password;
+
+      const hash = bcrypt.hashSync(password, 10);
+      const result = bcrypt.compareSync(password, hash);
+      console.log(result);
+
       const db = DB.Connection;
-      const data = await db.query<OkPacket>("insert into user set ?", user);
+
+      const data = await db.query<OkPacket>("insert into user (familyName, givenName, email, password) values (?,?,?,?)", [user.familyName, user.givenName, user.email, hash]);
 
       response.json({
         id: data[0].insertId
@@ -50,7 +58,7 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
       const count = await db.query<ITableCount[] & RowDataPacket[]>("select count(*) as total from user");
 
       // Récupérer les lignes
-      const data = await db.query<IUserRO[] & RowDataPacket[]>("select userId, familyName, givenName, email from user limit ? offset ?", [limit, offset]);
+      const data = await db.query<IUserRO[] & RowDataPacket[]>("select userId, familyName, givenName, email, password from user limit ? offset ?", [limit, offset]);
 
       // Construire la réponse
       const res: IIndexResponse<IUserRO> = {
@@ -85,7 +93,7 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
 
       const userId = request.params.id;
 
-      const data = await db.query<IUserRO[] & RowDataPacket[]>(`select userId, familyName, givenName, email from user where userId=?`, [userId]);
+      const data = await db.query<IUserRO[] & RowDataPacket[]>(`select userId, familyName, givenName, email, password from user where userId=?`, [userId]);
 
       const res: IIndexResponseId<IUserRO> = {
         id: userId,
