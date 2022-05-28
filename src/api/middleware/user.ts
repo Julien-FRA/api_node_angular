@@ -21,8 +21,8 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
       const password = user.password;
 
       const hash = bcrypt.hashSync(password, 10);
-      const result = bcrypt.compareSync(password, hash);
-      console.log(result);
+      // const result = bcrypt.compareSync(password, hash);
+      // console.log(result);
 
       const db = DB.Connection;
 
@@ -68,9 +68,9 @@ routerIndex.get<{}, IIndexResponse<IUserRO>, {}, IIndexQuery>('/',
         rows: data[0]
       }
 
-      const [ rowResult ] = res.rows;
+      const [rowResult] = res.rows;
 
-      if(!rowResult) {
+      if (!rowResult) {
         throw new CustomError(`Erreur dans la requête`, 404, 'Unknown user');
       }
 
@@ -100,9 +100,9 @@ routerIndex.get<IParams, IIndexResponseId<IUserRO>, {}, IIndexQuery>('/:id',
         rows: data[0]
       }
 
-      const [ rowResult ] = res.rows;
+      const [rowResult] = res.rows;
 
-      if(!rowResult) {
+      if (!rowResult) {
         throw new CustomError(`userId not found`, 404, 'Unknown user');
       }
 
