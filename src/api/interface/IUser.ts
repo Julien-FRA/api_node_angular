@@ -4,6 +4,7 @@ export interface IUser {
     givenName?: string;
     email: string;
     password: string;
+    token: string;
 }
 
 // export type IUserCreate = Omit<IUser, 'userId'>;

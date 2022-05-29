@@ -12,6 +12,8 @@ const routerIndex = Router({ mergeParams: true });
 
 const bcrypt = require('bcryptjs');
 
+const jwt = require("jsonwebtoken");
+
 routerIndex.post<{}, ICreateResponse, IUser>('/',
   async (request, response, next: NextFunction) => {
 
@@ -20,17 +22,29 @@ routerIndex.post<{}, ICreateResponse, IUser>('/',
 
       const password = user.password;
 
-      const hash = bcrypt.hashSync(password, 10);
+      const passwordHash = bcrypt.hashSync(password, 10);
       // const result = bcrypt.compareSync(password, hash);
       // console.log(result);
 
       const db = DB.Connection;
 
-      const data = await db.query<OkPacket>("insert into user (familyName, givenName, email, password) values (?,?,?,?)", [user.familyName, user.givenName, user.email, hash]);
+      const data = await db.query<OkPacket>("insert into user (familyName, givenName, email, password) values (?,?,?,?)", [user.familyName, user.givenName, user.email, passwordHash]);
+
+      // Create token
+      const token = jwt.sign(
+        { id: user.userId, email: user.email },
+        process.env.TOKEN_KEY, //// LE PROBLEME VIENT D'ICI !!!!!!!!!!
+        {
+          expiresIn: "2h",
+        }
+      );
+      // save user token
+      user.token = token;
 
       response.json({
         id: data[0].insertId
       });
+
 
     } catch (err: any) {
       next(new CustomError(`Erreur d'insertion des données`, 400, err.message));
